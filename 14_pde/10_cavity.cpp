@@ -3,6 +3,7 @@
 #include <vector>
 #include <chrono>
 #include <immintrin.h>
+#include <openacc.h>
 
 using namespace std;
 typedef vector<vector<float> > matrix;
@@ -81,11 +82,7 @@ int main() {
     }
     for (int j=1; j<ny-1; j+=8){
       for (int i=1; i<nx-1; i+=8){
-        printf("j:%d\n",j);
-        printf("i:%d\n",i);
-        printf("p:%p\n",&un[j][i]);
         __m256 unvec = _mm256_load_ps(&un[j][i]);
-        printf("hoge1");
         __m256 uim1 = _mm256_load_ps(&un[j][i-1]);
         __m256 uip1 = _mm256_load_ps(&un[j][i+1]);
         __m256 ujm1 = _mm256_load_ps(&un[j-1][i]);
@@ -115,12 +112,14 @@ int main() {
         _mm256_store_ps(&v[j][i],vvec);
       }
     }
+#pragma acc loop
     for (int j=1; j<ny-1; j++){
       u[j][0] = 0;
       u[j][nx-1] = 0;
       v[j][0] = 0;
       v[j][nx-1] = 0;
     } 
+#pragma acc loop
     for (int i=1; i<ny-1; i++){
       u[0][i] = 0;
       u[nx-1][i] = 1;
